@@ -89,6 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Full</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Operator\Downloads\boost_1_64_0;C:\Program Files %28x86%29\MySQL\MySQL Connector C++ 1.1.9\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>User32.lib;Kernel32.lib;Winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -110,9 +111,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\boost_1_64_0;C:\Program Files %28x86%29\MySQL\MySQL Connector C++ 1.1.9\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
+      <AdditionalDependencies>mysqlcppconn.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\MySQL\MySQL Connector C++ 1.1.9\lib\opt;C:\Program Files %28x86%29\MySQL\MySQL Connector C++ 1.1.9\include\cppconn;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -128,6 +133,7 @@
     <ClCompile Include="Error_Report.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PayForm.cpp" />
+    <ClCompile Include="Queue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Error_Report.h" />
@@ -135,6 +141,7 @@
     <ClInclude Include="PayForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="Queue.h" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -142,6 +149,11 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PayForm.resx">
+      <DependentUpon>PayForm.h</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
