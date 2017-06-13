@@ -66,7 +66,7 @@ namespace 印表機付費管理 {
 				p,
 				0,
 				&cbBuf
-			) && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+			) || GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
 				p = (LPBYTE)malloc(cbBuf);
 				GetJob(
 					Jinfo->hPrinter,
@@ -95,10 +95,10 @@ namespace 印表機付費管理 {
 					dmduplex_str = L"單面列印";
 					break;
 				case DMDUP_HORIZONTAL:
-					dmduplex_str = L"雙面列印長邊翻頁";
+					dmduplex_str = L"雙面列印短邊翻頁";
 					break;
 				case DMDUP_VERTICAL:
-					dmduplex_str = L"雙面列印短邊翻頁";
+					dmduplex_str = L"雙面列印長邊翻頁";
 					break;
 				}
 				this->L_DMDUPLEX->Text = gcnew String(dmduplex_str);
@@ -506,7 +506,7 @@ private: System::Void Pay_Butt_Click(System::Object^  sender, System::EventArgs^
 		}
 
 		driver = get_driver_instance();
-		con = driver->connect("tcp://localhost:3306", "root", "0000");
+		con = driver->connect("tcp://140.116.25.50:3306", "Client", "WE3I6A");
 		/* Connect to the MySQL test database */
 		con->setSchema("print_management");
 
@@ -557,7 +557,7 @@ private: System::Void Pay_Butt_Click(System::Object^  sender, System::EventArgs^
 
 		if (Money < cMoney) {
 			wchar_t momeymsg[50];
-			swprintf(momeymsg, L"需要NT$%d，餘額只有NT$%d!\0", cMoney, Money);
+			wsprintf(momeymsg, L"需要NT$%d，餘額只有NT$%d!\0", cMoney, Money);
 			MessageBoxQ(
 				static_cast<HWND>(this->Handle.ToPointer()),//主視窗的HANDLE
 				momeymsg,
@@ -632,7 +632,7 @@ private: System::Void Pay_Butt_Click(System::Object^  sender, System::EventArgs^
 				payinfo->Jstat->_signal = JOB_PRINTING;
 				stmt->execute(money_update_command);
 				wchar_t succmsg[50];
-				swprintf(succmsg, L"餘額%d", Money -cMoney);
+				wsprintf(succmsg, L"餘額%d", Money -cMoney);
 				MessageBoxQ(
 					NULL,
 					succmsg,

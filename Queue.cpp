@@ -13,7 +13,9 @@ myJob* Jsearch(DWORD JobId, myJob* table[10]) {
 myJob* Jinsert(DWORD JobId, myJob* table[10]) {
 	if (JobId) {
 		myJob* null = Jsearch(0, table);
-		null->_JobId = JobId;
+		if (null != 0) {
+			null->_JobId = JobId;
+		}
 		return null;
 
 	}

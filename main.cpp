@@ -72,6 +72,81 @@ DWORD WINAPI Printer_Screener(PVOID _PrinterName) {
 		ExitThread(0);
 	}
 
+	//*****************************************//kill existed jobs before intialization//*****************************************
+	PRINTER_INFO_2* pPnt;
+	LPBYTE LPpnt,LPJobs;
+	DWORD cBuft = 0;
+	DWORD ccBuft = 0;
+
+	if (!GetPrinter(
+		 hPrinter,
+		 2,
+		LPpnt,
+		0,
+		&cBuft
+	) || GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+		LPpnt = (LPBYTE)malloc(cBuft);
+		GetPrinter(
+			hPrinter,
+			2,
+			LPpnt,
+			cBuft,
+			&ccBuft
+		);
+		pPnt = (PRINTER_INFO_2*)LPpnt;
+	}
+	if (pPnt) {
+		JOB_INFO_2* pJobs;
+		DWORD Job_num;
+		if (EnumJobs(
+			hPrinter,
+			0,   //FirstJob
+			pPnt->cJobs,
+			2,
+			LPJobs,
+			0,
+			&cBuft,
+			&Job_num
+		) || GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+			LPJobs = (LPBYTE)malloc(cBuft);
+			EnumJobs(
+				hPrinter,
+				0,   //FirstJob
+				pPnt->cJobs,
+				2,
+				LPJobs,
+				cBuft,
+				&cBuft,
+				&Job_num
+			);
+			if (LPJobs) {
+				pJobs = (JOB_INFO_2*)LPJobs;
+				for (int i = 0; i < Job_num;i++) {
+					if (!SetJob(
+						hPrinter,
+						(pJobs + i)->JobId,
+						0,
+						NULL,//iflevel = 0, pJob should be NULL
+						JOB_CONTROL_DELETE
+					)) {
+						Error_Report(L"Error", L"Fail to delete existed job!");
+					}
+				}
+				free(LPJobs);
+				free(LPpnt);
+			}
+			else {
+				Error_Report((LPTSTR)PrinterName, L"Fail to get jobs information");
+			}
+		}
+		
+		
+	}
+	else {
+		Error_Report((LPTSTR)PrinterName, L"Fail to get printer information");
+	}
+
+	//************************************************//intialization of hNotify//*****************************************
 	hNotify = FindFirstPrinterChangeNotification(
 		hPrinter,
 		PRINTER_CHANGE_JOB,
@@ -135,18 +210,43 @@ DWORD WINAPI Printer_Screener(PVOID _PrinterName) {
 		
 		if (ChangeReason & PRINTER_CHANGE_ADD_JOB) {
 			if (JobId != 0) {
-				Jinsert(JobId, queue)->_signal = JOB_SPOOLING;
-				if (!SetJob(
-					hPrinter,
-					JobId,
-					0,
-					NULL,//iflevel = 0, pJob should be NULL
-					JOB_CONTROL_PAUSE
-				)) {
-					Error_Report(L"Error", L"Fail to pause last added job!");
-					ClosePrinter(hPrinter);
-					ExitThread(0);
+				myJob* last = Jinsert(JobId, queue);
+				if (last == 0) {
+					if (!SetJob(
+						hPrinter,
+						JobId,
+						0,
+						NULL,//iflevel = 0, pJob should be NULL
+						JOB_CONTROL_DELETE
+					)) {
+						Error_Report(L"Error", L"Fail to delete overflow job!");
+						ClosePrinter(hPrinter);
+						ExitThread(0);
+					}
+					else {
+						MessageBoxQ(
+							NULL,
+							L"一個印表機不能同時超過10個列印，工作已取消!",
+							L"通知",
+							MB_YESNO | MB_ICONEXCLAMATION | MB_DEFBUTTON1 | MB_APPLMODAL //MB_APPLMODAL確保使用者必須回應詢問
+							);
+					}
 				}
+				else {
+					last->_signal = JOB_SPOOLING;
+					if (!SetJob(
+						hPrinter,
+						JobId,
+						0,
+						NULL,//iflevel = 0, pJob should be NULL
+						JOB_CONTROL_PAUSE
+					)) {
+						Error_Report(L"Error", L"Fail to pause last added job!");
+						ClosePrinter(hPrinter);
+						ExitThread(0);
+					}
+				}
+
 			}
 			else {
 				Error_Report(L"Error", L"Last Added job without ID!");
