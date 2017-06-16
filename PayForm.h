@@ -1,6 +1,6 @@
 ﻿/*Printer_payment, a simple printing paying management software base on
 win32 API.
-Copyright (C) 2017  Cheng Wei
+Copyright (C) 2017  Wei Cheng, 	Zhi Hao Shih, Chang Fu Wang
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
